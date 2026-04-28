@@ -1,6 +1,5 @@
 package pio.daw.ra8.ejercicios.jpa;
 
-import javax.jdo.annotations.Unique;
 
 import jakarta.persistence.*;
 
@@ -8,7 +7,6 @@ import jakarta.persistence.*;
 public class Libro {
     
     @Id
-    @Unique
     private String ISBN;
 
     private String titulo;
