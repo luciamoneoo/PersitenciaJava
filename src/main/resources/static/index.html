@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CinemaApp – DAW RA9</title>
+  <!-- Bootstrap 5 – solo CSS, sin JS -->
+  <link rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+        integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
+        crossorigin="anonymous" />
+  <link rel="stylesheet" href="css/estilos.css" />
+</head>
+<body>
+
+  <!-- ══════════════════════════════════════
+       BARRA DE ESTADO (mensajes feedback)
+  ══════════════════════════════════════ -->
+  <div id="status-bar" class="status-bar" role="alert"></div>
+
+  <!-- ══════════════════════════════════════
+       NAVBAR
+  ══════════════════════════════════════ -->
+  <nav class="navbar">
+    <div class="navbar-brand">
+      🎬 <span>CinemaApp</span>
+    </div>
+    <div class="navbar-subtitle">
+      Consumiendo nuestra REST API con <code>fetch()</code> · DAW RA9
+    </div>
+  </nav>
+
+  <!-- ══════════════════════════════════════
+       PESTAÑAS DE NAVEGACIÓN
+  ══════════════════════════════════════ -->
+  <div class="tab-bar">
+    <button class="tab-btn active" data-tab="peliculas">🎥 Películas</button>
+    <button class="tab-btn" data-tab="directores">🎬 Directores</button>
+    <button class="tab-btn" data-tab="generos">🏷️ Géneros</button>
+    <button class="tab-btn" data-tab="proyecciones">📅 Proyecciones</button>
+    <button class="tab-btn" data-tab="buscar-entrada">🎟️ Buscar Entrada</button>
+  </div>
+
+  <div class="container-fluid px-4 py-3">
+
+    <!-- ══════════════════════════════════════
+         PANEL: PELÍCULAS
+    ══════════════════════════════════════ -->
+    <section id="tab-peliculas" class="tab-panel">
+      <div class="panel-header">
+        <h2>Películas</h2>
+        <button class="btn-toggle-form" onclick="toggleForm('form-nueva-pelicula')">
+          + Nueva película
+        </button>
+      </div>
+
+      <!-- Formulario crear película (oculto por defecto) -->
+      <div id="form-nueva-pelicula" class="form-card d-none">
+        <h3>Nueva película</h3>
+        <form id="crear-pelicula-form">
+          <div class="row g-2">
+            <div class="col-md-6">
+              <label>Título *</label>
+              <input type="text" name="titulo" class="form-control dark-input" required />
+            </div>
+            <div class="col-md-3">
+              <label>Año *</label>
+              <input type="number" name="anio" class="form-control dark-input" min="1888" required />
+            </div>
+            <div class="col-md-3">
+              <label>Duración (min) *</label>
+              <input type="number" name="duracion" class="form-control dark-input" min="1" required />
+            </div>
+            <div class="col-md-6">
+              <label>Sinopsis</label>
+              <textarea name="sinopsis" class="form-control dark-input" rows="2"></textarea>
+            </div>
+            <div class="col-md-3">
+              <label>Precio entrada (€) *</label>
+              <input type="number" name="precioEntrada" class="form-control dark-input"
+                     step="0.01" min="0" required />
+            </div>
+            <div class="col-md-3">
+              <label>ID Director *</label>
+              <input type="number" name="directorId" class="form-control dark-input" min="1" required />
+            </div>
+          </div>
+          <div class="mt-3">
+            <button type="submit" class="btn-primary-cinema">Crear película</button>
+            <button type="button" class="btn-secondary-cinema"
+                    onclick="toggleForm('form-nueva-pelicula')">Cancelar</button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Lista de tarjetas de películas -->
+      <div id="lista-peliculas" class="cards-grid">
+        <div class="loading-spinner">Cargando películas…</div>
+      </div>
+    </section>
+
+    <!-- ══════════════════════════════════════
+         PANEL: DIRECTORES
+    ══════════════════════════════════════ -->
+    <section id="tab-directores" class="tab-panel d-none">
+      <div class="panel-header">
+        <h2>Directores</h2>
+        <button class="btn-toggle-form" onclick="toggleForm('form-nuevo-director')">
+          + Nuevo director
+        </button>
+      </div>
+
+      <div id="form-nuevo-director" class="form-card d-none">
+        <h3>Nuevo director</h3>
+        <form id="crear-director-form">
+          <div class="row g-2">
+            <div class="col-md-4">
+              <label>Nombre *</label>
+              <input type="text" name="nombre" class="form-control dark-input" required />
+            </div>
+            <div class="col-md-4">
+              <label>Apellidos *</label>
+              <input type="text" name="apellidos" class="form-control dark-input" required />
+            </div>
+            <div class="col-md-4">
+              <label>Nacionalidad</label>
+              <input type="text" name="nacionalidad" class="form-control dark-input" />
+            </div>
+            <div class="col-md-4">
+              <label>Año nacimiento</label>
+              <input type="number" name="anioNacimiento" class="form-control dark-input" min="1800" />
+            </div>
+          </div>
+          <div class="mt-3">
+            <button type="submit" class="btn-primary-cinema">Crear director</button>
+            <button type="button" class="btn-secondary-cinema"
+                    onclick="toggleForm('form-nuevo-director')">Cancelar</button>
+          </div>
+        </form>
+      </div>
+
+      <div id="lista-directores" class="cards-grid">
+        <div class="loading-spinner">Cargando directores…</div>
+      </div>
+    </section>
+
+    <!-- ══════════════════════════════════════
+         PANEL: GÉNEROS
+    ══════════════════════════════════════ -->
+    <section id="tab-generos" class="tab-panel d-none">
+      <div class="panel-header">
+        <h2>Géneros</h2>
+        <button class="btn-toggle-form" onclick="toggleForm('form-nuevo-genero')">
+          + Nuevo género
+        </button>
+      </div>
+
+      <div id="form-nuevo-genero" class="form-card d-none">
+        <h3>Nuevo género</h3>
+        <form id="crear-genero-form">
+          <div class="row g-2">
+            <div class="col-md-4">
+              <label>Nombre *</label>
+              <input type="text" name="nombre" class="form-control dark-input" required />
+            </div>
+            <div class="col-md-8">
+              <label>Descripción</label>
+              <input type="text" name="descripcion" class="form-control dark-input" />
+            </div>
+          </div>
+          <div class="mt-3">
+            <button type="submit" class="btn-primary-cinema">Crear género</button>
+            <button type="button" class="btn-secondary-cinema"
+                    onclick="toggleForm('form-nuevo-genero')">Cancelar</button>
+          </div>
+        </form>
+      </div>
+
+      <div id="lista-generos" class="cards-grid">
+        <div class="loading-spinner">Cargando géneros…</div>
+      </div>
+    </section>
+
+    <!-- ══════════════════════════════════════
+         PANEL: PROYECCIONES
+    ══════════════════════════════════════ -->
+    <section id="tab-proyecciones" class="tab-panel d-none">
+      <div class="panel-header">
+        <h2>Proyecciones</h2>
+      </div>
+
+      <div id="lista-proyecciones" class="proyecciones-list">
+        <div class="loading-spinner">Cargando proyecciones…</div>
+      </div>
+
+      <!-- Modal de confirmación de entrada (aparece al comprar) -->
+      <div id="entrada-modal" class="entrada-modal d-none">
+        <div class="entrada-ticket">
+          <div class="ticket-header">🎟️ ¡Entrada comprada!</div>
+          <div id="ticket-contenido"></div>
+          <button class="btn-primary-cinema mt-3"
+                  onclick="document.getElementById('entrada-modal').classList.add('d-none')">
+            Cerrar
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══════════════════════════════════════
+         PANEL: BUSCAR ENTRADA
+    ══════════════════════════════════════ -->
+    <section id="tab-buscar-entrada" class="tab-panel d-none">
+      <div class="panel-header">
+        <h2>Buscar entrada por localizador</h2>
+      </div>
+
+      <div class="form-card" style="max-width: 520px;">
+        <form id="buscar-entrada-form">
+          <label>Localizador (UUID)</label>
+          <div class="d-flex gap-2 mt-1">
+            <input type="text" id="input-localizador" class="form-control dark-input"
+                   placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx" required />
+            <button type="submit" class="btn-primary-cinema" style="white-space:nowrap;">
+              Buscar
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <div id="resultado-entrada" class="mt-4"></div>
+    </section>
+
+  </div><!-- /container -->
+
+  <!-- Los scripts van al final: primero api.js (funciones fetch),
+       luego app.js (interfaz y eventos) -->
+  <script src="js/api.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,1172 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>RA9 – Frontend, HTTP y APIs REST con JavaScript</title>
+  <style>
+    :root {
+      --primary:   #145a32;
+      --accent:    #1e8449;
+      --light-bg:  #eafaf1;
+      --code-bg:   #1e1e2e;
+      --code-fg:   #cdd6f4;
+      --exercise:  #fef9e7;
+      --exercise-border: #f0c040;
+      --note-bg:   #e8f6f3;
+      --note-border: #17a589;
+      --warn-bg:   #fdedec;
+      --warn-border: #e74c3c;
+      --font-main: 'Segoe UI', system-ui, sans-serif;
+      --font-mono: 'Cascadia Code', 'Fira Code', 'Consolas', monospace;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: var(--font-main);
+      font-size: 16px;
+      line-height: 1.7;
+      color: #2c3e50;
+      background: #f8f9fa;
+    }
+
+    /* ── Layout ── */
+    .page-wrapper { display: flex; min-height: 100vh; }
+
+    nav#toc {
+      width: 270px;
+      min-width: 270px;
+      background: var(--primary);
+      color: #ecf0f1;
+      padding: 2rem 1.2rem;
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      overflow-y: auto;
+    }
+
+    nav#toc h2 {
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: #82e0aa;
+      margin-bottom: 1rem;
+    }
+
+    nav#toc ul { list-style: none; }
+    nav#toc ul li { margin-bottom: 0.25rem; }
+
+    nav#toc a {
+      color: #a9dfbf;
+      text-decoration: none;
+      font-size: 0.88rem;
+      display: block;
+      padding: 0.25rem 0.5rem;
+      border-radius: 4px;
+      transition: background 0.15s;
+    }
+    nav#toc a:hover { background: rgba(255,255,255,0.1); color: #fff; }
+
+    nav#toc .toc-section { margin-top: 0.8rem; }
+    nav#toc .toc-section > a {
+      color: #d5f5e3;
+      font-weight: 600;
+      font-size: 0.9rem;
+    }
+    nav#toc .toc-sub { padding-left: 1rem; }
+
+    main {
+      flex: 1;
+      padding: 3rem 4rem;
+      max-width: 960px;
+    }
+
+    /* ── Header ── */
+    header {
+      background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+      color: white;
+      padding: 3rem 4rem 2.5rem;
+    }
+
+    header .badge {
+      display: inline-block;
+      background: rgba(255,255,255,0.2);
+      color: #fff;
+      font-size: 0.78rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 0.25rem 0.75rem;
+      border-radius: 20px;
+      margin-bottom: 0.8rem;
+    }
+
+    header h1 { font-size: 2.2rem; font-weight: 700; margin-bottom: 0.6rem; }
+    header p { font-size: 1.05rem; opacity: 0.9; max-width: 640px; }
+
+    .meta-bar {
+      background: var(--light-bg);
+      border-left: 4px solid var(--accent);
+      padding: 0.75rem 1.5rem;
+      display: flex;
+      gap: 2.5rem;
+      font-size: 0.9rem;
+      color: var(--primary);
+      flex-wrap: wrap;
+    }
+    .meta-bar strong { font-weight: 700; }
+
+    /* ── Sections ── */
+    section { margin-bottom: 3.5rem; }
+
+    h2 {
+      font-size: 1.6rem;
+      color: var(--primary);
+      border-bottom: 2px solid var(--accent);
+      padding-bottom: 0.4rem;
+      margin-bottom: 1.2rem;
+      margin-top: 2rem;
+    }
+
+    h3 { font-size: 1.15rem; color: var(--accent); margin: 1.5rem 0 0.6rem; }
+    h4 { font-size: 1rem; color: #555; margin: 1.2rem 0 0.4rem; font-weight: 600; }
+
+    p { margin-bottom: 0.85rem; }
+    ul, ol { margin: 0.6rem 0 1rem 1.5rem; }
+    li { margin-bottom: 0.3rem; }
+
+    /* ── Code ── */
+    pre {
+      background: var(--code-bg);
+      color: var(--code-fg);
+      padding: 1.2rem 1.4rem;
+      border-radius: 8px;
+      overflow-x: auto;
+      font-family: var(--font-mono);
+      font-size: 0.88rem;
+      line-height: 1.6;
+      margin: 1rem 0 1.4rem;
+    }
+
+    code {
+      font-family: var(--font-mono);
+      font-size: 0.88em;
+      background: #e8f8f0;
+      color: #145a32;
+      padding: 0.1em 0.4em;
+      border-radius: 3px;
+    }
+
+    pre code { background: transparent; color: inherit; padding: 0; border-radius: 0; font-size: 1em; }
+
+    .kw  { color: #89b4fa; }
+    .typ { color: #a6e3a1; }
+    .str { color: #a6e3a1; }
+    .cm  { color: #6c7086; font-style: italic; }
+    .ann { color: #fab387; }
+    .num { color: #fab387; }
+    .mth { color: #89dceb; }
+    .hl  { color: #f9e2af; }  /* highlight amarillo para URLs, status codes */
+
+    /* ── Callouts ── */
+    .note, .exercise, .warning, .resources {
+      border-radius: 8px;
+      padding: 1rem 1.2rem;
+      margin: 1.2rem 0;
+    }
+
+    .note { background: var(--note-bg); border-left: 4px solid var(--note-border); }
+    .note::before { content: "ℹ️  Nota: "; font-weight: 700; color: #148f77; }
+
+    .warning { background: var(--warn-bg); border-left: 4px solid var(--warn-border); }
+    .warning::before { content: "⚠️  Atención: "; font-weight: 700; color: #c0392b; }
+
+    .exercise { background: var(--exercise); border-left: 4px solid var(--exercise-border); }
+    .exercise-title { font-weight: 700; color: #7d6608; font-size: 0.95rem; margin-bottom: 0.4rem; }
+    .exercise-title::before { content: "✏️  "; }
+
+    .resources { background: #f4ecf7; border-left: 4px solid #8e44ad; }
+    .resources-title { font-weight: 700; color: #6c3483; font-size: 0.95rem; margin-bottom: 0.5rem; }
+    .resources-title::before { content: "🔗  "; }
+    .resources ul { margin-bottom: 0; }
+    .resources a { color: #7d3c98; }
+    .resources a:hover { color: #6c3483; text-decoration: underline; }
+
+    /* ── Tables ── */
+    table { width: 100%; border-collapse: collapse; margin: 1rem 0 1.5rem; font-size: 0.92rem; }
+    th { background: var(--primary); color: #fff; padding: 0.6rem 1rem; text-align: left; }
+    td { padding: 0.5rem 1rem; border-bottom: 1px solid #d5f5e3; }
+    tr:nth-child(even) td { background: #eafaf1; }
+
+    /* ── Session label ── */
+    .session-tag {
+      display: inline-block;
+      background: var(--accent);
+      color: white;
+      font-size: 0.75rem;
+      font-weight: 600;
+      padding: 0.15rem 0.6rem;
+      border-radius: 12px;
+      margin-bottom: 0.5rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    /* ── Diagrama de capas ── */
+    .stack-diagram {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+      max-width: 480px;
+      margin: 1.2rem 0;
+      font-size: 0.9rem;
+    }
+    .stack-layer {
+      padding: 0.65rem 1.2rem;
+      font-weight: 600;
+      text-align: center;
+    }
+    .stack-arrow {
+      text-align: center;
+      color: #888;
+      font-size: 1.1rem;
+      line-height: 1;
+    }
+    .layer-browser   { background: #d6eaf8; color: #1a5276; border-radius: 8px 8px 0 0; }
+    .layer-http      { background: #d5f5e3; color: #145a32; }
+    .layer-spring    { background: #fef9e7; color: #7d6608; }
+    .layer-jpa       { background: #fdf2f8; color: #76448a; }
+    .layer-mysql     { background: #fdebd0; color: #784212; border-radius: 0 0 8px 8px; }
+
+    /* ── Footer ── */
+    footer { background: var(--primary); color: #a9dfbf; text-align: center; padding: 1.5rem; font-size: 0.85rem; }
+
+    @media (max-width: 900px) {
+      nav#toc { display: none; }
+      main { padding: 1.5rem; }
+      header { padding: 2rem 1.5rem; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="badge">DAW · Programación · Web</div>
+  <h1>RA9 – Frontend, HTTP y APIs REST con JavaScript</h1>
+  <p>Arquitectura cliente-servidor, protocolo HTTP y comunicación con nuestra API Spring Boot
+     mediante la función <code style="background:rgba(255,255,255,0.15);color:#fff">fetch()</code> de JavaScript.</p>
+</header>
+
+<div class="meta-bar">
+  <span><strong>Duración estimada:</strong> 8–10 horas</span>
+  <span><strong>Tecnologías:</strong> HTML · CSS · JavaScript · fetch()</span>
+  <span><strong>Backend:</strong> Spring Boot 3.3</span>
+  <span><strong>Prerrequisitos:</strong> RA9 BBDD relacionales, HTML básico</span>
+</div>
+
+<div class="page-wrapper">
+
+  <!-- ──────────────── SIDEBAR TOC ──────────────── -->
+  <nav id="toc">
+    <h2>Contenidos</h2>
+    <ul>
+      <li class="toc-section"><a href="#arquitectura">1. Arquitectura cliente-servidor</a>
+        <ul class="toc-sub">
+          <li><a href="#stack-completo">El stack completo</a></li>
+          <li><a href="#tomcat-embebido">Tomcat embebido</a></li>
+        </ul>
+      </li>
+      <li class="toc-section"><a href="#http">2. Protocolo HTTP</a>
+        <ul class="toc-sub">
+          <li><a href="#request">Estructura del request</a></li>
+          <li><a href="#response">Estructura del response</a></li>
+          <li><a href="#metodos">Métodos HTTP</a></li>
+          <li><a href="#codigos">Códigos de estado</a></li>
+          <li><a href="#headers">Cabeceras</a></li>
+        </ul>
+      </li>
+      <li class="toc-section"><a href="#frontend-backend">3. Frontend vs Backend</a>
+        <ul class="toc-sub">
+          <li><a href="#responsabilidades">Responsabilidades</a></li>
+          <li><a href="#misma-maquina">Un solo servidor</a></li>
+        </ul>
+      </li>
+      <li class="toc-section"><a href="#rest">4. APIs REST y JSON</a>
+        <ul class="toc-sub">
+          <li><a href="#que-es-rest">¿Qué es REST?</a></li>
+          <li><a href="#json">JSON</a></li>
+          <li><a href="#endpoints">Nuestros endpoints</a></li>
+        </ul>
+      </li>
+      <li class="toc-section"><a href="#fetch">5. La API fetch()</a>
+        <ul class="toc-sub">
+          <li><a href="#async-await">async / await</a></li>
+          <li><a href="#get-fetch">GET con fetch()</a></li>
+          <li><a href="#post-fetch">POST con fetch()</a></li>
+          <li><a href="#delete-fetch">DELETE con fetch()</a></li>
+          <li><a href="#errores-fetch">Manejo de errores</a></li>
+          <li><a href="#dom">Actualizar el DOM</a></li>
+        </ul>
+      </li>
+      <li class="toc-section"><a href="#cors">6. CORS y @CrossOrigin</a>
+        <ul class="toc-sub">
+          <li><a href="#same-origin">Same-Origin Policy</a></li>
+          <li><a href="#cuando-cors">¿Cuándo hace falta CORS?</a></li>
+        </ul>
+      </li>
+      <li class="toc-section"><a href="#recursos">Recursos</a></li>
+    </ul>
+  </nav>
+
+  <!-- ──────────────── MAIN CONTENT ──────────────── -->
+  <main>
+
+    <!-- ════════════════════════════════════════════
+         SECCIÓN 1 – ARQUITECTURA CLIENTE-SERVIDOR
+    ═════════════════════════════════════════════ -->
+    <section id="arquitectura">
+      <div class="session-tag">Sesión 1 · ~1 h</div>
+      <h2>1. Arquitectura cliente-servidor</h2>
+
+      <p>
+        Cuando abres un navegador y escribes una URL, estás usando un modelo llamado
+        <strong>cliente-servidor</strong>. El <strong>cliente</strong> (el navegador) hace una
+        <em>petición</em>; el <strong>servidor</strong> la procesa y devuelve una <em>respuesta</em>.
+        Entre ellos viajan mensajes siguiendo las reglas del protocolo HTTP.
+      </p>
+
+      <h3 id="stack-completo">El stack completo de CinemaApp</h3>
+      <p>
+        Nuestra aplicación tiene varias capas. Cada capa tiene una responsabilidad clara y se
+        comunica solo con la que tiene justo encima y justo debajo:
+      </p>
+
+      <div class="stack-diagram">
+        <div class="stack-layer layer-browser">🌐 Navegador (Chrome, Firefox…)<br/><small>HTML + CSS + JavaScript · <em>el cliente</em></small></div>
+        <div class="stack-arrow">↕ HTTP (peticiones y respuestas JSON)</div>
+        <div class="stack-layer layer-spring">⚙️ Spring Boot (Tomcat embebido)<br/><small>@RestController · Lógica de negocio</small></div>
+        <div class="stack-arrow">↕ JPA / Hibernate</div>
+        <div class="stack-layer layer-jpa">🗂️ Spring Data JPA<br/><small>Repositorios · Entidades · JPQL</small></div>
+        <div class="stack-arrow">↕ JDBC (protocolo de MySQL)</div>
+        <div class="stack-layer layer-mysql">🐬 MySQL en Docker<br/><small>Base de datos relacional · ra9db</small></div>
+      </div>
+
+      <p>
+        Cuando el usuario hace clic en "Películas" en nuestra interfaz, el navegador envía
+        <code>GET /peliculas</code> a Spring Boot. Spring llama al servicio, que llama al repositorio,
+        que ejecuta <code>SELECT * FROM pelicula</code> en MySQL. La respuesta sube la cadena hasta
+        que el controlador la serializa como JSON y la devuelve al navegador, donde JavaScript
+        la convierte en tarjetas HTML visibles.
+      </p>
+
+      <h3 id="tomcat-embebido">Tomcat embebido: el servidor dentro del JAR</h3>
+      <p>
+        A diferencia de un servidor web clásico (Apache, Nginx…) que hay que instalar y configurar
+        aparte, Spring Boot incluye <strong>Apache Tomcat dentro del propio JAR</strong>. Cuando
+        ejecutas <code>mvn spring-boot:run</code>, arranca un servidor HTTP en el puerto 8080 que:
+      </p>
+      <ul>
+        <li>Atiende peticiones HTTP de cualquier cliente (navegador, curl, Postman…)</li>
+        <li>Enruta cada URL al <code>@RestController</code> correcto</li>
+        <li>Sirve los ficheros estáticos de <code>src/main/resources/static/</code> directamente</li>
+      </ul>
+
+      <div class="note">
+        El directorio <code>src/main/resources/static/</code> es especial en Spring Boot: todo lo
+        que pongas ahí se sirve como si fuera un servidor web estático. Nuestro
+        <code>index.html</code> está en esa carpeta, por eso puedes abrirlo con
+        <code>http://localhost:8080/</code>.
+      </div>
+
+      <div class="exercise">
+        <div class="exercise-title">Ejercicio 1.1 – Dibuja el stack</div>
+        Sin mirar esta página, dibuja en papel el stack completo de CinemaApp con las 5 capas.
+        Para cada capa anota: su nombre, qué tecnología usa y con qué protocolo habla con la
+        capa inferior. Compara tu dibujo con el diagrama de arriba.
+      </div>
+
+      <div class="exercise">
+        <div class="exercise-title">Ejercicio 1.2 – Traza una petición</div>
+        Escribe en pseudocódigo los pasos que ocurren desde que el usuario hace clic en
+        "Comprar Entrada" en la interfaz hasta que el ticket aparece en pantalla. Incluye qué
+        capa actúa en cada paso.
+      </div>
+    </section>
+
+
+    <!-- ════════════════════════════════════════════
+         SECCIÓN 2 – PROTOCOLO HTTP
+    ═════════════════════════════════════════════ -->
+    <section id="http">
+      <div class="session-tag">Sesiones 1–2 · ~1,5 h</div>
+      <h2>2. Protocolo HTTP</h2>
+
+      <p>
+        <strong>HTTP</strong> (HyperText Transfer Protocol) es el protocolo de comunicación de
+        la web. Define exactamente cómo se formatean y envían los mensajes entre cliente y servidor.
+        Toda petición tiene una <em>estructura fija</em> y toda respuesta también.
+      </p>
+
+      <h3 id="request">Estructura de un request (petición)</h3>
+      <p>
+        Cuando el navegador hace <code>fetch('/peliculas')</code>, envía al servidor un mensaje
+        con este formato:
+      </p>
+
+      <pre><code><span class="hl">GET /peliculas HTTP/1.1</span>               <span class="cm">← línea de petición: método + URL + versión</span>
+<span class="kw">Host:</span> localhost:8080                   <span class="cm">← cabecera obligatoria: host destino</span>
+<span class="kw">Accept:</span> application/json               <span class="cm">← le decimos al servidor qué formato queremos</span>
+<span class="kw">Content-Type:</span> application/json         <span class="cm">← en POST/PUT: formato del cuerpo que enviamos</span>
+                                       <span class="cm">← línea en blanco que separa cabeceras del cuerpo</span>
+<span class="cm">← (sin cuerpo en GET)</span></code></pre>
+
+      <p>En un POST que crea una película, el mensaje incluye además un cuerpo JSON:</p>
+
+      <pre><code><span class="hl">POST /peliculas HTTP/1.1</span>
+<span class="kw">Host:</span> localhost:8080
+<span class="kw">Content-Type:</span> application/json
+<span class="kw">Content-Length:</span> 97
+
+<span class="str">{
+  "titulo": "Oppenheimer",
+  "anio": 2023,
+  "duracion": 180,
+  "precioEntrada": 9.50,
+  "director": { "id": 1 }
+}</span></code></pre>
+
+      <h3 id="response">Estructura de un response (respuesta)</h3>
+      <p>La respuesta del servidor tiene un formato similar:</p>
+
+      <pre><code><span class="hl">HTTP/1.1 200 OK</span>                        <span class="cm">← línea de estado: versión + código + descripción</span>
+<span class="kw">Content-Type:</span> application/json;charset=UTF-8
+<span class="kw">Transfer-Encoding:</span> chunked
+
+<span class="str">[
+  {
+    "id": 1,
+    "titulo": "Inception",
+    "anio": 2010,
+    "duracion": 148,
+    "precioEntrada": 8.50,
+    "nombreDirector": "Christopher Nolan",
+    "generos": ["Ciencia ficción", "Thriller"]
+  },
+  ...
+]</span></code></pre>
+
+      <h3 id="metodos">Métodos HTTP y su relación con CRUD</h3>
+      <p>
+        HTTP define varios <strong>métodos</strong> (también llamados <em>verbos</em>). En REST,
+        cada verbo HTTP tiene una semántica clara relacionada con las operaciones CRUD:
+      </p>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Método HTTP</th>
+            <th>Operación CRUD</th>
+            <th>Endpoint en CinemaApp</th>
+            <th>Código de respuesta esperado</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>GET</code></td>
+            <td>Read (leer)</td>
+            <td><code>GET /peliculas</code></td>
+            <td><code>200 OK</code></td>
+          </tr>
+          <tr>
+            <td><code>GET</code></td>
+            <td>Read (leer uno)</td>
+            <td><code>GET /peliculas/3</code></td>
+            <td><code>200 OK</code> · <code>404</code> si no existe</td>
+          </tr>
+          <tr>
+            <td><code>POST</code></td>
+            <td>Create (crear)</td>
+            <td><code>POST /peliculas</code></td>
+            <td><code>201 Created</code></td>
+          </tr>
+          <tr>
+            <td><code>PUT</code></td>
+            <td>Update (actualizar)</td>
+            <td><code>PUT /peliculas/3</code></td>
+            <td><code>200 OK</code></td>
+          </tr>
+          <tr>
+            <td><code>DELETE</code></td>
+            <td>Delete (eliminar)</td>
+            <td><code>DELETE /peliculas/3</code></td>
+            <td><code>204 No Content</code></td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="note">
+        <strong>GET es idempotente y seguro</strong>: puedes repetirlo mil veces sin efecto
+        secundario. <strong>POST no es idempotente</strong>: cada POST puede crear un nuevo recurso.
+        <strong>DELETE es idempotente</strong>: borrar algo que ya no existe no cambia el estado del sistema.
+      </div>
+
+      <h3 id="codigos">Códigos de estado HTTP</h3>
+      <p>
+        El código de estado (un número de 3 dígitos) le dice al cliente si la petición tuvo
+        éxito o qué tipo de error ocurrió. El primer dígito indica la categoría:
+      </p>
+
+      <table>
+        <thead>
+          <tr><th>Rango</th><th>Categoría</th><th>Ejemplos habituales</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>2xx</code></td>
+            <td>Éxito</td>
+            <td>
+              <code>200 OK</code> – petición exitosa con cuerpo<br/>
+              <code>201 Created</code> – recurso creado (POST)<br/>
+              <code>204 No Content</code> – éxito sin cuerpo (DELETE)
+            </td>
+          </tr>
+          <tr>
+            <td><code>4xx</code></td>
+            <td>Error del cliente</td>
+            <td>
+              <code>400 Bad Request</code> – datos inválidos (validación fallida)<br/>
+              <code>404 Not Found</code> – recurso no encontrado<br/>
+              <code>409 Conflict</code> – conflicto (ej. sin asientos disponibles)
+            </td>
+          </tr>
+          <tr>
+            <td><code>5xx</code></td>
+            <td>Error del servidor</td>
+            <td>
+              <code>500 Internal Server Error</code> – excepción no controlada<br/>
+              <code>503 Service Unavailable</code> – servidor sobrecargado o caído
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <p>
+        En Spring Boot, los <code>4xx</code> los produce tu código (p.ej. al lanzar
+        <code>RecursoNoEncontradoException</code> → 404). Los <code>5xx</code> indican un bug
+        en el servidor o un problema de infraestructura.
+      </p>
+
+      <h3 id="headers">Cabeceras (Headers) importantes</h3>
+      <table>
+        <thead>
+          <tr><th>Cabecera</th><th>Quién la envía</th><th>Significado</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>Content-Type: application/json</code></td>
+            <td>Cliente (en POST/PUT)</td>
+            <td>El cuerpo de la petición es JSON</td>
+          </tr>
+          <tr>
+            <td><code>Content-Type: application/json;charset=UTF-8</code></td>
+            <td>Servidor</td>
+            <td>La respuesta contiene JSON codificado en UTF-8</td>
+          </tr>
+          <tr>
+            <td><code>Accept: application/json</code></td>
+            <td>Cliente</td>
+            <td>El cliente prefiere recibir JSON (Spring lo usa para <em>content negotiation</em>)</td>
+          </tr>
+          <tr>
+            <td><code>Authorization: Bearer &lt;token&gt;</code></td>
+            <td>Cliente</td>
+            <td>Token de autenticación (JWT, OAuth…) – no se usa en este proyecto</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="exercise">
+        <div class="exercise-title">Ejercicio 2.1 – Inspecciona con DevTools</div>
+        <ol>
+          <li>Abre CinemaApp en el navegador (<code>http://localhost:8080/</code>).</li>
+          <li>Pulsa <strong>F12</strong> para abrir las Herramientas de Desarrollador.</li>
+          <li>Ve a la pestaña <strong>Network</strong> (Red).</li>
+          <li>Recarga la página y haz clic en la pestaña "Películas".</li>
+          <li>Encuentra la petición <code>GET /peliculas</code> en la lista.</li>
+          <li>Copia los <em>Request Headers</em> y los <em>Response Headers</em> en tu cuaderno.</li>
+          <li>¿Qué código de estado devolvió? ¿Cuántos milisegundos tardó?</li>
+        </ol>
+      </div>
+
+      <div class="exercise">
+        <div class="exercise-title">Ejercicio 2.2 – Prueba con curl</div>
+        <p>Desde la terminal, ejecuta estos comandos y observa las respuestas:</p>
+        <pre><code><span class="cm"># GET – lista todas las películas</span>
+curl -s http://localhost:8080/peliculas | python3 -m json.tool
+
+<span class="cm"># POST – crea una película (sustituye 1 por un ID de director real)</span>
+curl -s -X POST http://localhost:8080/peliculas \
+  -H "Content-Type: application/json" \
+  -d '{"titulo":"Dune","anio":2021,"duracion":155,"precioEntrada":9.0,"director":{"id":1}}'
+
+<span class="cm"># DELETE – elimina la película con id 99 (que no existe)</span>
+curl -s -o /dev/null -w "%{http_code}" -X DELETE http://localhost:8080/peliculas/99</code></pre>
+        <p>¿Qué código de estado devuelve el DELETE en ese caso? ¿Por qué?</p>
+      </div>
+    </section>
+
+
+    <!-- ════════════════════════════════════════════
+         SECCIÓN 3 – FRONTEND VS BACKEND
+    ═════════════════════════════════════════════ -->
+    <section id="frontend-backend">
+      <div class="session-tag">Sesión 2 · ~1 h</div>
+      <h2>3. Frontend vs Backend</h2>
+
+      <p>
+        En el desarrollo web moderno hablamos de <strong>frontend</strong> y <strong>backend</strong>
+        para referirnos a las dos grandes mitades de una aplicación:
+      </p>
+
+      <table>
+        <thead>
+          <tr><th>Aspecto</th><th>Frontend</th><th>Backend</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>¿Dónde se ejecuta?</strong></td>
+            <td>En el navegador del usuario</td>
+            <td>En el servidor (nuestra máquina o la nube)</td>
+          </tr>
+          <tr>
+            <td><strong>¿Qué hace?</strong></td>
+            <td>Muestra la interfaz, gestiona eventos del usuario, llama a la API</td>
+            <td>Lógica de negocio, acceso a la base de datos, seguridad</td>
+          </tr>
+          <tr>
+            <td><strong>Tecnologías</strong></td>
+            <td>HTML, CSS, JavaScript (en este proyecto: vanilla JS)</td>
+            <td>Java, Spring Boot, JPA, MySQL (en este proyecto)</td>
+          </tr>
+          <tr>
+            <td><strong>Ficheros clave</strong></td>
+            <td><code>index.html</code>, <code>estilos.css</code>, <code>api.js</code>, <code>app.js</code></td>
+            <td><code>PeliculaController.java</code>, <code>PeliculaService.java</code>, <code>PeliculaRepository.java</code></td>
+          </tr>
+          <tr>
+            <td><strong>¿Cómo se comunican?</strong></td>
+            <td colspan="2" style="text-align:center">JSON sobre HTTP — el frontend hace peticiones, el backend responde</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3 id="responsabilidades">Separación de responsabilidades</h3>
+      <p>
+        Una de las ideas fundamentales del desarrollo web es que el frontend y el backend
+        <strong>no deben mezclar sus responsabilidades</strong>. El backend no debería generar
+        HTML; el frontend no debería acceder directamente a la base de datos.
+        Entre ellos solo pasa JSON.
+      </p>
+      <p>
+        Esta separación tiene ventajas prácticas:
+      </p>
+      <ul>
+        <li>El mismo backend puede servir a un frontend web, una app móvil y una aplicación de escritorio.</li>
+        <li>Los equipos de frontend y backend pueden trabajar en paralelo.</li>
+        <li>Es más fácil reemplazar una parte sin tocar la otra.</li>
+      </ul>
+
+      <h3 id="misma-maquina">Nuestro caso: un solo servidor, mismo origen</h3>
+      <p>
+        En CinemaApp, Spring Boot hace de backend <em>y</em> también de servidor de ficheros estáticos.
+        El frontend (HTML + JS) y la API REST conviven en <code>http://localhost:8080</code>.
+        Esto es posible porque Spring Boot sirve automáticamente la carpeta
+        <code>src/main/resources/static/</code>.
+      </p>
+
+      <div class="note">
+        En proyectos más grandes, el frontend suele ser una aplicación separada con su propio
+        servidor (p. ej. React con <code>npm run dev</code> en el puerto 3000). En ese caso,
+        el frontend y el backend están en orígenes distintos y necesitas configurar CORS
+        (lo veremos en la sección 6).
+      </div>
+
+      <div class="exercise">
+        <div class="exercise-title">Ejercicio 3.1 – Clasifica los ficheros</div>
+        <p>Para cada fichero de la lista, indica si pertenece al <strong>frontend</strong> o al
+        <strong>backend</strong>, y en qué capa de la arquitectura:</p>
+        <ul>
+          <li><code>PeliculaController.java</code></li>
+          <li><code>api.js</code></li>
+          <li><code>PeliculaRepository.java</code></li>
+          <li><code>estilos.css</code></li>
+          <li><code>PeliculaDTO.java</code></li>
+          <li><code>app.js</code></li>
+          <li><code>application.properties</code></li>
+          <li><code>index.html</code></li>
+        </ul>
+      </div>
+    </section>
+
+
+    <!-- ════════════════════════════════════════════
+         SECCIÓN 4 – APIs REST Y JSON
+    ═════════════════════════════════════════════ -->
+    <section id="rest">
+      <div class="session-tag">Sesión 3 · ~1,5 h</div>
+      <h2>4. APIs REST y JSON</h2>
+
+      <h3 id="que-es-rest">¿Qué es una API REST?</h3>
+      <p>
+        <strong>REST</strong> (Representational State Transfer) es un estilo de arquitectura para
+        APIs web. Una API REST sigue estos principios:
+      </p>
+      <ul>
+        <li><strong>Recursos como URLs:</strong> cada entidad del dominio tiene su propia URL.
+            <code>/peliculas</code> es la colección; <code>/peliculas/3</code> es un recurso concreto.</li>
+        <li><strong>Verbos HTTP:</strong> la operación la indica el método HTTP (GET, POST, PUT, DELETE),
+            no la URL. Nunca verás <code>/getPelicula</code> o <code>/deletePelicula</code> en una API REST.</li>
+        <li><strong>Sin estado (stateless):</strong> cada petición debe contener toda la información
+            necesaria para procesarla. El servidor no recuerda las peticiones anteriores.</li>
+        <li><strong>Representación:</strong> el servidor puede devolver el recurso en varios formatos.
+            Hoy en día se usa casi siempre <strong>JSON</strong>.</li>
+      </ul>
+
+      <h3 id="json">JSON – JavaScript Object Notation</h3>
+      <p>
+        JSON es el formato de intercambio de datos más usado en APIs REST. Su sintaxis es muy
+        sencilla: objetos entre llaves <code>{}</code>, arrays entre corchetes <code>[]</code>,
+        y valores separados por comas.
+      </p>
+
+      <pre><code><span class="cm">// Así luce un PeliculaDTO serializado como JSON</span>
+<span class="str">{
+  "id": 1,
+  "titulo": "Inception",
+  "anio": 2010,
+  "duracion": 148,
+  "sinopsis": "Un ladrón entra en los sueños de otros...",
+  "precioEntrada": 8.50,
+  "nombreDirector": "Christopher Nolan",
+  "generos": ["Ciencia ficción", "Thriller"]
+}</span></code></pre>
+
+      <p>Reglas básicas de JSON:</p>
+      <ul>
+        <li>Las <strong>claves</strong> van siempre entre comillas dobles: <code>"titulo"</code></li>
+        <li>Los <strong>strings</strong> también: <code>"Inception"</code></li>
+        <li>Los <strong>números</strong> sin comillas: <code>2010</code>, <code>8.50</code></li>
+        <li>Los <strong>booleanos</strong>: <code>true</code> / <code>false</code></li>
+        <li>El valor nulo: <code>null</code></li>
+        <li>No se permiten comentarios en JSON real (los de arriba son solo didácticos)</li>
+      </ul>
+
+      <h3 id="endpoints">Los endpoints de CinemaApp</h3>
+      <p>
+        Una API REST bien diseñada es predecible: si sabes que existe <code>/peliculas</code>,
+        puedes intuir que <code>/directores</code> funcionará igual. Esta es la lista completa
+        de endpoints de nuestra API:
+      </p>
+
+      <table>
+        <thead>
+          <tr><th>Método</th><th>URL</th><th>Descripción</th><th>Cuerpo / Parámetros</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>GET</code></td><td><code>/peliculas</code></td><td>Lista todas las películas</td><td>—</td></tr>
+          <tr><td><code>GET</code></td><td><code>/peliculas/{id}</code></td><td>Una película por ID</td><td>—</td></tr>
+          <tr><td><code>POST</code></td><td><code>/peliculas</code></td><td>Crea una película</td><td>JSON PeliculaDTO</td></tr>
+          <tr><td><code>PUT</code></td><td><code>/peliculas/{id}</code></td><td>Actualiza una película</td><td>JSON PeliculaDTO</td></tr>
+          <tr><td><code>DELETE</code></td><td><code>/peliculas/{id}</code></td><td>Elimina una película</td><td>—</td></tr>
+          <tr><td><code>GET</code></td><td><code>/peliculas/anio/{anio}</code></td><td>Películas de un año</td><td>—</td></tr>
+          <tr><td><code>GET</code></td><td><code>/peliculas/baratas?max=X</code></td><td>Películas con precio ≤ X</td><td>Query param <code>max</code></td></tr>
+          <tr><td><code>GET</code></td><td><code>/peliculas/estadisticas</code></td><td>Estadísticas de precios</td><td>—</td></tr>
+          <tr><td><code>GET</code></td><td><code>/directores</code></td><td>Lista todos los directores</td><td>—</td></tr>
+          <tr><td><code>POST</code></td><td><code>/directores</code></td><td>Crea un director</td><td>JSON DirectorDTO</td></tr>
+          <tr><td><code>DELETE</code></td><td><code>/directores/{id}</code></td><td>Elimina un director</td><td>—</td></tr>
+          <tr><td><code>GET</code></td><td><code>/generos</code></td><td>Lista todos los géneros</td><td>—</td></tr>
+          <tr><td><code>POST</code></td><td><code>/generos</code></td><td>Crea un género</td><td>JSON Genero</td></tr>
+          <tr><td><code>GET</code></td><td><code>/proyecciones</code></td><td>Lista proyecciones</td><td>—</td></tr>
+          <tr><td><code>POST</code></td><td><code>/proyecciones/{id}/entradas</code></td><td>Compra una entrada</td><td>—</td></tr>
+          <tr><td><code>GET</code></td><td><code>/entradas/{localizador}</code></td><td>Busca una entrada por UUID</td><td>—</td></tr>
+        </tbody>
+      </table>
+
+      <div class="exercise">
+        <div class="exercise-title">Ejercicio 4.1 – Estadísticas con curl</div>
+        Llama al endpoint <code>GET /peliculas/estadisticas</code> con curl o con el navegador.
+        ¿Qué campos devuelve? ¿Qué consulta JPQL crees que usa el repositorio internamente?
+      </div>
+
+      <div class="exercise">
+        <div class="exercise-title">Ejercicio 4.2 – Diseña nuevos endpoints</div>
+        El profesor de cine quiere saber cuántas entradas se han vendido por cada película.
+        ¿Qué URL y método HTTP usarías? ¿Qué forma tendría el JSON de respuesta?
+        Escribe el diseño del endpoint antes de implementarlo.
+      </div>
+    </section>
+
+
+    <!-- ════════════════════════════════════════════
+         SECCIÓN 5 – LA API FETCH()
+    ═════════════════════════════════════════════ -->
+    <section id="fetch">
+      <div class="session-tag">Sesiones 4–5 · ~3 h</div>
+      <h2>5. La API <code>fetch()</code> de JavaScript</h2>
+
+      <p>
+        <code>fetch()</code> es la función nativa del navegador para hacer peticiones HTTP desde
+        JavaScript. Está disponible en todos los navegadores modernos sin instalar nada.
+        Es el corazón de nuestro fichero <code>api.js</code>.
+      </p>
+
+      <h3 id="async-await">async / await — código asíncrono legible</h3>
+      <p>
+        Las peticiones de red <strong>no son inmediatas</strong>: el navegador tiene que enviar
+        la petición, esperar a que viaje por la red y a que el servidor procese y responda.
+        Durante ese tiempo, el resto de la página debe seguir funcionando (el usuario puede
+        hacer clic en otros elementos, el ratón sigue moviéndose…).
+      </p>
+      <p>
+        JavaScript resuelve esto con el concepto de <strong>asincronía</strong>. Una función
+        <code>async</code> puede <em>pausarse</em> en un punto (<code>await</code>) sin bloquear
+        el resto del programa, y <em>reanudarse</em> cuando llega el resultado.
+      </p>
+
+      <pre><code><span class="cm">// Una función async devuelve implícitamente una Promesa.</span>
+<span class="cm">// await pausa la función hasta que la Promesa se resuelve.</span>
+<span class="cm">// El navegador no se bloquea — solo esta función queda "pausada".</span>
+
+<span class="kw">async function</span> <span class="mth">ejemplo</span>() {
+  console.<span class="mth">log</span>(<span class="str">'Antes de la petición'</span>);
+
+  <span class="kw">const</span> resultado = <span class="kw">await</span> <span class="mth">fetch</span>(<span class="str">'/peliculas'</span>); <span class="cm">// ← pausa aquí</span>
+
+  console.<span class="mth">log</span>(<span class="str">'La petición ha terminado'</span>);
+  <span class="cm">// resultado es un objeto Response, no los datos todavía</span>
+}</code></pre>
+
+      <h3 id="get-fetch">GET con fetch() – leer datos del servidor</h3>
+      <p>
+        Este es el código real de <code>getPeliculas()</code> en nuestro <code>api.js</code>,
+        explicado línea a línea:
+      </p>
+
+      <pre><code><span class="cm">// Equivalente HTTP:  GET http://localhost:8080/peliculas</span>
+<span class="kw">async function</span> <span class="mth">getPeliculas</span>() {
+
+  <span class="cm">// 1. Llamamos a fetch() con la URL. Sin segundo argumento, usa GET por defecto.</span>
+  <span class="kw">const</span> respuesta = <span class="kw">await</span> <span class="mth">fetch</span>(<span class="str">'/peliculas'</span>);
+
+  <span class="cm">// 2. respuesta.ok es true si el código HTTP está entre 200 y 299.</span>
+  <span class="kw">if</span> (!respuesta.ok) {
+    <span class="kw">throw new</span> <span class="typ">Error</span>(<span class="str">`Error HTTP </span>${respuesta.status}<span class="str">`</span>);
+  }
+
+  <span class="cm">// 3. .json() lee el cuerpo del response y lo parsea.</span>
+  <span class="cm">// También es asíncrono → necesita otro await.</span>
+  <span class="kw">const</span> datos = <span class="kw">await</span> respuesta.<span class="mth">json</span>();
+
+  <span class="cm">// 4. Devolvemos el array de PeliculaDTO ya como objeto JavaScript.</span>
+  <span class="kw">return</span> datos;
+}</code></pre>
+
+      <div class="note">
+        <strong>fetch() no lanza error en códigos 4xx/5xx.</strong> Solo lanza error si hay
+        un fallo de red (sin conexión, timeout…). Por eso siempre debemos comprobar
+        <code>respuesta.ok</code> manualmente.
+      </div>
+
+      <h3 id="post-fetch">POST con fetch() – enviar datos al servidor</h3>
+      <p>
+        Para crear un recurso necesitamos enviar datos en el cuerpo de la petición,
+        indicar el formato con el header <code>Content-Type</code> y cambiar el método a
+        <code>POST</code>:
+      </p>
+
+      <pre><code><span class="cm">// Equivalente HTTP:  POST /peliculas   (con JSON en el cuerpo)</span>
+<span class="kw">async function</span> <span class="mth">crearPelicula</span>(datos) {
+
+  <span class="kw">const</span> respuesta = <span class="kw">await</span> <span class="mth">fetch</span>(<span class="str">'/peliculas'</span>, {
+
+    method: <span class="str">'POST'</span>,           <span class="cm">// cambiamos el método HTTP</span>
+
+    headers: {
+      <span class="str">'Content-Type'</span>: <span class="str">'application/json'</span>,  <span class="cm">// le decimos al servidor que enviamos JSON</span>
+    },
+
+    <span class="cm">// JSON.stringify() convierte el objeto JavaScript a string JSON.</span>
+    <span class="cm">// Sin esto el servidor recibiría "[object Object]", no JSON.</span>
+    body: <span class="typ">JSON</span>.<span class="mth">stringify</span>(datos),
+  });
+
+  <span class="kw">if</span> (!respuesta.ok) <span class="kw">throw new</span> <span class="typ">Error</span>(<span class="str">`Error HTTP </span>${respuesta.status}<span class="str">`</span>);
+
+  <span class="cm">// Spring devuelve 201 Created con el recurso creado en el cuerpo</span>
+  <span class="kw">return</span> respuesta.<span class="mth">json</span>();
+}</code></pre>
+
+      <h3 id="delete-fetch">DELETE con fetch() – eliminar un recurso</h3>
+      <p>
+        DELETE es especial: si tiene éxito, el servidor devuelve <code>204 No Content</code>,
+        que significa "lo borré pero no tengo nada que devolverte". Intentar llamar a
+        <code>.json()</code> en una respuesta 204 daría error.
+      </p>
+
+      <pre><code><span class="cm">// Equivalente HTTP:  DELETE /peliculas/3</span>
+<span class="kw">async function</span> <span class="mth">eliminarPelicula</span>(id) {
+
+  <span class="kw">const</span> respuesta = <span class="kw">await</span> <span class="mth">fetch</span>(<span class="str">`/peliculas/</span>${id}<span class="str">`</span>, {
+    method: <span class="str">'DELETE'</span>,
+  });
+
+  <span class="kw">if</span> (!respuesta.ok) <span class="kw">throw new</span> <span class="typ">Error</span>(<span class="str">`Error HTTP </span>${respuesta.status}<span class="str">`</span>);
+
+  <span class="cm">// 204 No Content → no hay cuerpo que parsear, devolvemos null</span>
+  <span class="kw">if</span> (respuesta.status === <span class="num">204</span>) <span class="kw">return null</span>;
+
+  <span class="kw">return</span> respuesta.<span class="mth">json</span>();
+}</code></pre>
+
+      <h3 id="errores-fetch">Manejo de errores con try/catch</h3>
+      <p>
+        Cuando usamos <code>await</code>, los errores se pueden capturar con un bloque
+        <code>try/catch</code> exactamente igual que con código síncrono:
+      </p>
+
+      <pre><code><span class="kw">async function</span> <span class="mth">cargarPeliculas</span>() {
+  <span class="kw">try</span> {
+
+    <span class="cm">// Todo lo que puede fallar va dentro del try</span>
+    <span class="kw">const</span> peliculas = <span class="kw">await</span> <span class="mth">getPeliculas</span>();
+    <span class="mth">renderizarPeliculas</span>(peliculas);
+
+  } <span class="kw">catch</span> (err) {
+
+    <span class="cm">// Si fetch() lanzó un error (red) o nosotros hicimos throw,</span>
+    <span class="cm">// llegamos aquí. err.message contiene el texto del error.</span>
+    console.<span class="mth">error</span>(<span class="str">'Fallo al cargar películas:'</span>, err.message);
+    <span class="mth">mostrarMensaje</span>(err.message, <span class="str">'error'</span>);  <span class="cm">// barra de estado roja</span>
+
+  }
+}</code></pre>
+
+      <h3 id="dom">Actualizar el DOM con los datos recibidos</h3>
+      <p>
+        Una vez que tenemos los datos del servidor, los mostramos en pantalla manipulando el
+        <strong>DOM</strong> (la representación en memoria del HTML). La forma más directa es
+        con <code>innerHTML</code> y <em>template literals</em> (las comillas invertidas ` `):
+      </p>
+
+      <pre><code><span class="kw">function</span> <span class="mth">renderizarPeliculas</span>(peliculas) {
+
+  <span class="cm">// Array.map() transforma cada película en un string HTML.</span>
+  <span class="cm">// Los template literals permiten incrustar expresiones con ${}.</span>
+  <span class="kw">const</span> html = peliculas.<span class="mth">map</span>(p => <span class="str">`
+    &lt;div class="card-item"&gt;
+      &lt;div class="card-titulo"&gt;</span>${p.titulo}<span class="str">&lt;/div&gt;
+      &lt;div class="card-meta"&gt;</span>${p.anio}<span class="str"> · </span>${p.duracion}<span class="str"> min&lt;/div&gt;
+      &lt;div class="precio-tag"&gt;</span>${p.precioEntrada}<span class="str"> €&lt;/div&gt;
+    &lt;/div&gt;`</span>).<span class="mth">join</span>(<span class="str">''</span>);  <span class="cm">// unimos todos los strings en uno solo</span>
+
+  <span class="cm">// Asignamos el HTML resultante al contenedor del DOM.</span>
+  <span class="cm">// El navegador lo parsea y muestra las tarjetas.</span>
+  document.<span class="mth">getElementById</span>(<span class="str">'lista-peliculas'</span>).innerHTML = html;
+}</code></pre>
+
+      <div class="warning">
+        Usar <code>innerHTML</code> con datos que vienen de usuarios externos puede ser un
+        riesgo de seguridad (XSS – Cross-Site Scripting). En este proyecto los datos vienen
+        de nuestra propia API controlada, así que es seguro. En producción con datos de
+        usuarios desconocidos deberías sanear el texto con <code>textContent</code> o una
+        biblioteca de sanitización.
+      </div>
+
+      <div class="exercise">
+        <div class="exercise-title">Ejercicio 5.1 – Buscar películas por año</div>
+        Añade a <code>api.js</code> una función <code>getPeliculasPorAnio(anio)</code> que llame
+        a <code>GET /peliculas/anio/{anio}</code>. Luego añade en la pestaña "Películas" un
+        pequeño campo de texto + botón que filtre la lista por año usando esa función.
+      </div>
+
+      <div class="exercise">
+        <div class="exercise-title">Ejercicio 5.2 – Películas baratas</div>
+        Añade en <code>api.js</code> la función <code>getPeliculasBaratas(maxPrecio)</code> que
+        llame a <code>GET /peliculas/baratas?max={maxPrecio}</code>. Recuerda que los
+        <em>query parameters</em> van después del <code>?</code> en la URL.
+        Crea un formulario en la interfaz para buscar películas con precio máximo X €.
+      </div>
+
+      <div class="exercise">
+        <div class="exercise-title">Ejercicio 5.3 – Estadísticas en la interfaz</div>
+        Llama al endpoint <code>GET /peliculas/estadisticas</code> al cargar la pestaña de
+        películas y muestra el precio promedio, mínimo y máximo en un recuadro informativo
+        encima de la lista de tarjetas.
+      </div>
+    </section>
+
+
+    <!-- ════════════════════════════════════════════
+         SECCIÓN 6 – CORS Y @CrossOrigin
+    ═════════════════════════════════════════════ -->
+    <section id="cors">
+      <div class="session-tag">Sesión 5 · ~0,5 h</div>
+      <h2>6. CORS y <code>@CrossOrigin</code></h2>
+
+      <h3 id="same-origin">La política del mismo origen (Same-Origin Policy)</h3>
+      <p>
+        Los navegadores tienen una regla de seguridad llamada <strong>Same-Origin Policy</strong>:
+        por defecto, una página web solo puede hacer peticiones <code>fetch()</code> al
+        <em>mismo origen</em> desde el que fue cargada. El <strong>origen</strong> está compuesto por:
+      </p>
+      <ul>
+        <li><strong>Esquema:</strong> <code>http</code> o <code>https</code></li>
+        <li><strong>Host:</strong> nombre del servidor o IP</li>
+        <li><strong>Puerto:</strong> número de puerto</li>
+      </ul>
+      <p>
+        Dos URLs tienen el mismo origen solo si los tres coinciden:
+      </p>
+      <table>
+        <thead><tr><th>URL del frontend</th><th>URL del backend</th><th>¿Mismo origen?</th></tr></thead>
+        <tbody>
+          <tr><td><code>http://localhost:8080</code></td><td><code>http://localhost:8080/peliculas</code></td><td>✅ Sí (nuestro caso)</td></tr>
+          <tr><td><code>http://localhost:3000</code></td><td><code>http://localhost:8080/peliculas</code></td><td>❌ No (puerto distinto)</td></tr>
+          <tr><td><code>https://miapp.com</code></td><td><code>http://miapp.com/peliculas</code></td><td>❌ No (esquema distinto)</td></tr>
+          <tr><td><code>http://miapp.com</code></td><td><code>http://api.miapp.com/peliculas</code></td><td>❌ No (host distinto)</td></tr>
+        </tbody>
+      </table>
+
+      <h3>¿Qué es CORS?</h3>
+      <p>
+        <strong>CORS</strong> (Cross-Origin Resource Sharing) es el mecanismo que permite al
+        servidor <em>autorizar</em> peticiones de orígenes cruzados. Funciona mediante
+        cabeceras HTTP especiales que el servidor añade a sus respuestas.
+      </p>
+      <p>
+        Cuando el navegador va a hacer una petición a un origen distinto con un método "no
+        simple" (PUT, DELETE, o POST con <code>Content-Type: application/json</code>), primero
+        envía automáticamente una petición <strong>preflight</strong> con el método
+        <code>OPTIONS</code> para preguntar al servidor si lo permite:
+      </p>
+
+      <pre><code><span class="cm">// Petición preflight automática del navegador (tú no la escribes)</span>
+<span class="hl">OPTIONS /peliculas HTTP/1.1</span>
+<span class="kw">Host:</span> localhost:8080
+<span class="kw">Origin:</span> http://localhost:3000
+<span class="kw">Access-Control-Request-Method:</span> POST
+<span class="kw">Access-Control-Request-Headers:</span> Content-Type
+
+<span class="cm">// Respuesta del servidor (con CORS habilitado)</span>
+<span class="hl">HTTP/1.1 200 OK</span>
+<span class="kw">Access-Control-Allow-Origin:</span> http://localhost:3000
+<span class="kw">Access-Control-Allow-Methods:</span> GET, POST, PUT, DELETE
+<span class="kw">Access-Control-Allow-Headers:</span> Content-Type</code></pre>
+
+      <h3 id="cuando-cors">Nuestro caso: ¿por qué NO necesitamos CORS?</h3>
+      <p>
+        En CinemaApp, el fichero <code>index.html</code> es servido por el propio Tomcat de
+        Spring Boot en <code>http://localhost:8080</code>. Cuando el JavaScript hace
+        <code>fetch('/peliculas')</code>, la petición va al mismo servidor
+        (<code>http://localhost:8080</code>). El origen es idéntico → no hay petición
+        cross-origin → no hace falta CORS.
+      </p>
+
+      <div class="note">
+        Si abres las DevTools (F12 → Network) en CinemaApp y filtras por "Fetch/XHR",
+        verás que no aparece ninguna petición <code>OPTIONS</code>. Esto confirma que el
+        navegador reconoce que estamos en el mismo origen y no necesita hacer el preflight.
+      </div>
+
+      <h3>¿Cuándo sí haría falta CORS?</h3>
+      <p>
+        Si en el futuro migras el frontend a React o Vue y lo ejecutas con
+        <code>npm run dev</code> (que usa el puerto 3000 por defecto), tendrías dos servidores:
+        el frontend en <code>http://localhost:3000</code> y el backend en
+        <code>http://localhost:8080</code>. Orígenes distintos → necesitas CORS.
+      </p>
+      <p>En Spring Boot se habilita con la anotación <code>@CrossOrigin</code>:</p>
+
+      <pre><code><span class="cm">// En el controlador, para permitir peticiones desde localhost:3000</span>
+<span class="ann">@CrossOrigin</span>(origins = <span class="str">"http://localhost:3000"</span>)
+<span class="ann">@RestController</span>
+<span class="ann">@RequestMapping</span>(<span class="str">"/peliculas"</span>)
+<span class="kw">public class</span> <span class="typ">PeliculaController</span> { <span class="cm">...</span> }
+
+<span class="cm">// O globalmente en una clase de configuración:</span>
+<span class="ann">@Configuration</span>
+<span class="kw">public class</span> <span class="typ">WebConfig</span> <span class="kw">implements</span> <span class="typ">WebMvcConfigurer</span> {
+
+  <span class="ann">@Override</span>
+  <span class="kw">public void</span> <span class="mth">addCorsMappings</span>(<span class="typ">CorsRegistry</span> registry) {
+    registry.<span class="mth">addMapping</span>(<span class="str">"/**"</span>)
+            .<span class="mth">allowedOrigins</span>(<span class="str">"http://localhost:3000"</span>)
+            .<span class="mth">allowedMethods</span>(<span class="str">"GET"</span>, <span class="str">"POST"</span>, <span class="str">"PUT"</span>, <span class="str">"DELETE"</span>);
+  }
+}</code></pre>
+
+      <div class="exercise">
+        <div class="exercise-title">Ejercicio 6.1 – Verifica en DevTools</div>
+        <ol>
+          <li>Abre CinemaApp y las DevTools (F12 → Network).</li>
+          <li>Filtra por "Fetch/XHR" o "All".</li>
+          <li>Haz clic en varias pestañas y compra una entrada.</li>
+          <li>¿Aparece alguna petición con método <code>OPTIONS</code>? ¿Por qué no?</li>
+          <li>Fíjate en la columna "Domain" de cada petición. ¿Todas van a
+              <code>localhost:8080</code>?</li>
+        </ol>
+      </div>
+    </section>
+
+
+    <!-- ════════════════════════════════════════════
+         RECURSOS
+    ═════════════════════════════════════════════ -->
+    <section id="recursos">
+      <h2>Recursos oficiales</h2>
+
+      <div class="resources">
+        <div class="resources-title">Documentación de referencia</div>
+        <table>
+          <thead><tr><th>Recurso</th><th>URL</th><th>Para qué</th></tr></thead>
+          <tbody>
+            <tr>
+              <td>MDN – fetch()</td>
+              <td><code>developer.mozilla.org/es/docs/Web/API/fetch</code></td>
+              <td>Referencia completa de la API fetch</td>
+            </tr>
+            <tr>
+              <td>MDN – async/await</td>
+              <td><code>developer.mozilla.org/es/docs/Learn/JavaScript/Asynchronous</code></td>
+              <td>Guía de programación asíncrona en JS</td>
+            </tr>
+            <tr>
+              <td>MDN – HTTP</td>
+              <td><code>developer.mozilla.org/es/docs/Web/HTTP</code></td>
+              <td>Especificación del protocolo HTTP</td>
+            </tr>
+            <tr>
+              <td>Spring CORS</td>
+              <td><code>docs.spring.io/spring-framework/docs/current/reference/html/web.html#mvc-cors</code></td>
+              <td>Configuración de CORS en Spring MVC</td>
+            </tr>
+            <tr>
+              <td>Bootstrap 5</td>
+              <td><code>getbootstrap.com/docs/5.3</code></td>
+              <td>Framework CSS usado en la interfaz</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<footer>
+  RA9 – Frontend, HTTP y APIs REST · DAW · Programación · JavaScript · Spring Boot 3.3 · Bootstrap 5
+</footer>
+
+</body>
+</html>
